@@ -1,25 +1,22 @@
-var express = require('express');
-var path = require('path');
+let config = require('./config');
+let mongoose = require('mongoose');
+let express = require('express');
+let bodyParser = require('body-parser');
+let app = express();
+let routes = require('./routes/routes');
 
-var app = express();
+app.use(bodyParser.json({ limit: '50mb' }));
+app.use(bodyParser.urlencoded({ limit: '50mb', extended: true }));
 
 
-app.use(express.static(path.join(__dirname, 'dist')));
+mongoose.connect(config.db.uri).then(
+    () => { console.log("successfully Connected to DB"); }
+);
 
-app.use(express.static('dist', { index: '/index.html' }));
+app.use( '/api' , routes )
 
-app.listen(3000);
+app.listen(config.port);
 
-app.use(function (req, res, next) {
+module.exports = app;
 
-    console.log(req.url);
 
-    if (/^\/v1.0\//.test(req.url)) {
-        next();
-    } else {
-        console.log('index');
-
-        res.sendFile(__dirname + '/dist/index.html');
-    }
-
-});
